@@ -3,6 +3,7 @@ package webui
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"sync"
@@ -29,13 +30,19 @@ type context struct {
 	*Server
 }
 
+type logger struct{}
+
+func (l logger) Error(key string, err error) {
+	log.Printf("ERROR: %s - %s", key, err.Error())
+}
+
 // NewServer creates and returns a new server. The 'namespace' param is the redis namespace to use. The hostPort param is the address to bind on to expose the API.
 func NewServer(namespace string, pool *redis.Pool, hostPort string) *Server {
 	router := web.New(context{})
 	server := &Server{
 		namespace: namespace,
 		pool:      pool,
-		client:    work.NewClient(namespace, pool),
+		client:    work.NewClient(namespace, pool, logger{}),
 		hostPort:  hostPort,
 		server:    manners.NewWithServer(&http.Server{Addr: hostPort, Handler: router}),
 		router:    router,

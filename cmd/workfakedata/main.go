@@ -3,12 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
 )
+
+type logger struct{}
+
+func (l logger) Error(key string, err error) {
+	log.Printf("ERROR: %s - %s", key, err.Error())
+}
 
 var redisHostPort = flag.String("redis", ":6379", "redis hostport")
 var redisNamespace = flag.String("ns", "work", "redis namespace")
@@ -50,7 +57,7 @@ func main() {
 		}
 	}()
 
-	wp := work.NewWorkerPool(context{}, 5, *redisNamespace, pool)
+	wp := work.NewWorkerPool(context{}, 5, *redisNamespace, pool, logger{})
 	wp.Job("foobar", epsilonHandler)
 	wp.Start()
 
