@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine3.13
+FROM golang:1.17-alpine
 
 RUN apk --no-cache add git libc-dev gcc
 
